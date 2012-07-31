@@ -1,0 +1,3 @@
+Use Firefox to visit http://127.0.0.1/index.htm
+
+Under Linux sudo java HttpServer 80
