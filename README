@@ -1,3 +1,6 @@
+The original source code is from below link:
+    http://deeplyloving.iteye.com/blog/692425
+
 Use Firefox to visit http://127.0.0.1/index.htm
 
 Under Linux sudo java HttpServer 80
