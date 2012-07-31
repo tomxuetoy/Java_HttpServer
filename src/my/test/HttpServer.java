@@ -42,16 +42,16 @@ public class HttpServer {
         try {
             serverSocket = new ServerSocket(PORT);
             System.out.println(WEB_ROOT);   // now we know where we should put wwwroot
-            while (true) {
+            while (true) {	// always loop as server
                 Socket client = serverSocket.accept();
-                new IoHandler2(client);
+                new IoHandler2(client);		// Runnable thread
             }
         } catch (Exception e) {
             System.out.println("无法启动HTTP服务器:" + e.toString());
         }
         if (serverSocket == null)
             System.exit(1);// 无法开始服务器
-        System.out.println("HTTP 服务器正在运行,端口:" + PORT);
+        System.out.println("HTTP 服务器正在运行,端口:" + PORT);	// won't be executes because the above while(true)
     }
 
     /**
@@ -68,6 +68,7 @@ public class HttpServer {
      */
     public static void main(String[] args) {
         try {
+            System.out.println("the args length="+args.length);
             if (args.length != 1) {
                 usage();
             } else if (args.length == 1) {
@@ -195,11 +196,13 @@ public class HttpServer {
                 while ((line = in.readLine()) != null) {
                     if (line.equals(""))
                         break;
-                    if (line.indexOf(":") != -1) {
+                    if (line.indexOf(":") != -1) {	// print a series of key/value pairs
                         String key = line.substring(0, line.indexOf(':'))
                                 .trim();
+			System.out.println("key="+key);
                         String value = line.substring(line.indexOf(':') + 1)
                                 .trim();
+			System.out.println("value="+value);
                         http.put(key, value);
                         // 读取 POST 等数据的内容长度
                         if (line.startsWith("Content-Length")) {
@@ -282,7 +285,7 @@ public class HttpServer {
                 input = new BufferedReader(new InputStreamReader(client
                         .getInputStream()));
                 printWriter = new PrintWriter(new OutputStreamWriter(client
-                        .getOutputStream(), "GBK"), true);
+                        .getOutputStream(), "GBK"), true);	// BufferedWriter is not available in Java?
                 printStream = new PrintStream(client.getOutputStream(), true);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -293,7 +296,7 @@ public class HttpServer {
         public void run() {
             System.out.println("连接到服务器的用户:" + client);
             try {
-                IoProcessor request = new IoProcessor(input);
+                IoProcessor request = new IoProcessor(input);	// generate the "IoProcessor request" and then handle it by "IoService response"
                 IoService response = new IoService(printWriter, printStream);
                 response.setRequest(request);
                 response.responseInfo();
