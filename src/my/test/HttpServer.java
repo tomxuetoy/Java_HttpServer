@@ -41,9 +41,9 @@ public class HttpServer {
     public HttpServer() {
         try {
             serverSocket = new ServerSocket(PORT);
-            System.out.println(WEB_ROOT);   // now we know where we should put wwwroot
-            while (true) {	// always loop as server
-                Socket client = serverSocket.accept();
+            System.out.println("WEB_ROOT="+WEB_ROOT);   // now we know where we should put wwwroot
+            while (true) {	// always loop as server socket
+                Socket client = serverSocket.accept();	// the server socket accepts Firefox's request
                 new IoHandler2(client);		// Runnable thread
             }
         } catch (Exception e) {
@@ -119,27 +119,29 @@ public class HttpServer {
 //              }
             }
 
-            if ("GET".equalsIgnoreCase(request.getMethod())) {
+            if ("GET".equalsIgnoreCase(request.getMethod())) {	// e.g. use Firefox to visit the weblink, 
+		    						// then the "GET" request is generated
                 doGet();
             }
         }
 
         public void doGet() {
-            File file = new File(HttpServer.WEB_ROOT, request.getUri());
-            if (file.isDirectory()) {
+            File index_htm_file = new File(HttpServer.WEB_ROOT, request.getUri());
+            if (index_htm_file.isDirectory()) {
                 out.println("HTTP/1.0 200 OK");// 返回应答消息,并结束应答
                 out.println("Content-Type:text/html;charset=GBK");
                 out.println();
                 out.println("<h1>不允许访问文件夹!! Visit http://127.0.0.1/index.htm</h1>");
-            } else if (file.exists()) {
+            } else if (index_htm_file.exists()) {
                 byte[] bytes = new byte[BUFFER_SIZE];
                 FileInputStream fis = null;
-                if (file.exists()) {
+                if (index_htm_file.exists()) {
                     try {
-                        fis = new FileInputStream(file);
-                        int ch = fis.read(bytes, 0, BUFFER_SIZE);
+                        fis = new FileInputStream(index_htm_file);
+                        int ch = fis.read(bytes, 0, BUFFER_SIZE);	// read the index_htm_file data into 'bytes'
+			System.out.println(new String(bytes));		// to see what it reads: the html source code of index.htm	
                         while (ch != -1) {
-                            outs.write(bytes, 0, ch);
+                            outs.write(bytes, 0, ch);	// write the index_htm_file ('bytes') to client socket's 
                             ch = fis.read(bytes, 0, BUFFER_SIZE);
                         }
                     } catch (FileNotFoundException e) {
@@ -179,7 +181,7 @@ public class HttpServer {
         private void parseRequstInfo() {
             String line = null;
             try {
-                line = in.readLine();
+                line = in.readLine();	// in: the input from client socket; about the direction, think more...
                 // 读取第一行, 请求地址
                 System.out.println("line="+line);   // line=GET /index.htm HTTP/1.1
                 String resource = line.substring(line.indexOf('/'), line
@@ -189,11 +191,12 @@ public class HttpServer {
                 uri = URLDecoder.decode(resource, "UTF-8");// 反编码
                 System.out.println("uri="+uri);   // /index.htm
                 // 地址
-                method = new StringTokenizer(line).nextElement().toString();// 获取请求方法,
+                method = new StringTokenizer(line).nextElement().toString();// 获取请求方法
                 System.out.println("method="+method);   // GET
                 
                 // 读取所有浏览器发送过来的请求参数头部信息
                 while ((line = in.readLine()) != null) {
+			System.out.println("while-loop: line="+line);
                     if (line.equals(""))
                         break;
                     if (line.indexOf(":") != -1) {	// print a series of key/value pairs
@@ -283,7 +286,7 @@ public class HttpServer {
             this.client = socket;
             try {
                 input = new BufferedReader(new InputStreamReader(client
-                        .getInputStream()));
+                        .getInputStream()));	// input from client socket, reason: from server point of view; this code acts as server
                 printWriter = new PrintWriter(new OutputStreamWriter(client
                         .getOutputStream(), "GBK"), true);	// BufferedWriter is not available in Java?
                 printStream = new PrintStream(client.getOutputStream(), true);
@@ -298,7 +301,7 @@ public class HttpServer {
             try {
                 IoProcessor request = new IoProcessor(input);	// generate the "IoProcessor request" and then handle it by "IoService response"
                 IoService response = new IoService(printWriter, printStream);
-                response.setRequest(request);
+                response.setRequest(request);	// associate request and response
                 response.responseInfo();
                 closeSocket(client);
             } catch (Exception e) {
