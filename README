@@ -1,6 +1,12 @@
 The original source code is from below link:
     http://deeplyloving.iteye.com/blog/692425
 
-Use Firefox to visit http://127.0.0.1/index.htm
+Use Firefox 
+    (1) disable FoxyProxy + goagent
+    (2) to visit: http://127.0.0.1/index.htm
 
-Under Linux sudo java HttpServer 80
+Under Linux
+    (1) sudo java HttpServer 80
+    or
+    (2) open the project in NetBeans after 'sudo su'
+        run in NetBeans
